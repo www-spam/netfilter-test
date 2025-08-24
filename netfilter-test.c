@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <string.h>
 #include <strings.h>
-#include <libnetfilter_queue/libnetfilter_queue.h>
+#include "libnetfilter_queue.h"
 
 static char *block_host = NULL;
 
