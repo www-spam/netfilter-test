@@ -12,7 +12,6 @@ sample : netfilter-test test.gilgil.net
 ```
 
 ## 상세
-상세
 
 
 - iptables 명령어를 이용하셔 송수신되는 모든 패킷을 netfilter queue로 jump시킨다.
