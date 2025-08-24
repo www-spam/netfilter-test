@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <string.h>
 #include <strings.h>
-#include "libnetfilter_queue.h"
+#include <libnetfilter_queue/libnetfilter_queue.h>
 
 static char *block_host = NULL;
 
@@ -84,7 +84,7 @@ int should_drop(unsigned char *data, int len) {
 }
 
 static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
-                    struct nfq_data *nfa, void *data) {
+                   struct nfq_data *nfa, void *data) {
     uint32_t id = 0;
     struct nfqnl_msg_packet_hdr *ph;
     unsigned char *pkt;
@@ -99,40 +99,40 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     }
 
     return nfq_set_verdict(qh, id, NF_ACCEPT, 0, NULL);
-                    }
+}
 
-                    int main(int argc, char **argv) {
-                        struct nfq_handle *h;
-                        struct nfq_q_handle *qh;
-                        int fd, rv;
-                        char buf[4096] __attribute__ ((aligned));
+int main(int argc, char **argv) {
+    struct nfq_handle *h;
+    struct nfq_q_handle *qh;
+    int fd, rv;
+    char buf[4096] __attribute__ ((aligned));
 
-                        if (argc != 2) {
-                            fprintf(stderr, "usage: %s <host>\n", argv[0]);
-                            exit(1);
-                        }
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <host>\n", argv[0]);
+        exit(1);
+    }
 
-                        block_host = argv[1];
-                        printf("target: %s\n", block_host);
+    block_host = argv[1];
+    printf("target: %s\n", block_host);
 
-                        h = nfq_open();
-                        if (!h) exit(1);
+    h = nfq_open();
+    if (!h) exit(1);
 
-                        nfq_unbind_pf(h, AF_INET);
-                        if (nfq_bind_pf(h, AF_INET) < 0) exit(1);
+    nfq_unbind_pf(h, AF_INET);
+    if (nfq_bind_pf(h, AF_INET) < 0) exit(1);
 
-                        qh = nfq_create_queue(h, 0, &callback, NULL);
-                        if (!qh) exit(1);
+    qh = nfq_create_queue(h, 0, &callback, NULL);
+    if (!qh) exit(1);
 
-                        if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0) exit(1);
+    if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0) exit(1);
 
-                        fd = nfq_fd(h);
+    fd = nfq_fd(h);
 
-                        while ((rv = recv(fd, buf, sizeof(buf), 0)) >= 0) {
-                            nfq_handle_packet(h, buf, rv);
-                        }
+    while ((rv = recv(fd, buf, sizeof(buf), 0)) >= 0) {
+        nfq_handle_packet(h, buf, rv);
+    }
 
-                        nfq_destroy_queue(qh);
-                        nfq_close(h);
-                        return 0;
-                    }
+    nfq_destroy_queue(qh);
+    nfq_close(h);
+    return 0;
+}
